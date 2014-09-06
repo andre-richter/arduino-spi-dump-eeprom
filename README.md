@@ -7,7 +7,7 @@ Dump an SPI EEPROM in raw format to your PC via an Arduino.
 
 1. Connect the EEPROM to your Arduino's SPI header.
     * __The sketch uses Pin 10 as the default Chip Select pin__. You can change it in the sketch if you need to.
-2. Connect the Arduino to your PC via the USB programming port and upload the sketch.
+2. Connect the Arduino to your PC via the USB __programming port__ and upload the sketch.
 3. Compile the C program with a simple `make`
 4. Run the program and supply the following arguments:
     * The tty device name of your Arduino e.g. `-t /dev/ttyACM0`
