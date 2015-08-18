@@ -208,16 +208,12 @@ int main(int argc, char *argv[])
 		print_usage(stdout, argv[0]);
 	}
 
-	if(!format) {
-		format = 'h';
-	}
+	if(!format)	format = 'h';
 
 	else if(format != 'a' && format != 'd' && format != 'h') {
 		printf("\nSorry, invalid output format specified.\n\n");
 		print_usage(stdout, argv[0]);
 	}
-
-
 
 	/* Install ctrl-c signal handler */
 	sigaction(SIGINT, &int_handler, 0);
