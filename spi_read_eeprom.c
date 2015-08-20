@@ -122,7 +122,7 @@ void eeprom_read(int fd, unsigned int num_bytes, char format)
 				printf("\nInterrupted, errno: %d\n", errno);
 		}
 		else {
-			switch(format) {
+			switch (format) {
 				case 'a': printf("0x%08x: %c\n", i, byte); break;
 				case 'd': printf("0x%08x: %02d\n", i, byte); break;
 				case 'h': printf("0x%08x: 0x%02x\n", i, byte); break;
@@ -208,9 +208,10 @@ int main(int argc, char *argv[])
 		print_usage(stdout, argv[0]);
 	}
 
-	if(!format) format = 'h';
+	if (!format)
+		format = 'h';
 
-	else if(format != 'a' && format != 'd' && format != 'h') {
+	else if (format != 'a' && format != 'd' && format != 'h') {
 		printf("\nSorry, invalid output format specified.\n\n");
 		print_usage(stdout, argv[0]);
 	}
