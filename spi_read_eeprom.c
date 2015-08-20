@@ -3,7 +3,7 @@
  *
  * Small program for connecting to an Arduino running the
  * spi_read_eeprom.ino sketch.
- * 
+ *
  * Reads a number of bytes from the eeprom and saves them
  * in eeprom.bin
  *
@@ -12,19 +12,19 @@
  * ==========================================================
  *
  * The MIT License (MIT)
- * 
+ *
  * Copyright (c) 2014 Andre Richter
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,6 +37,7 @@
  *
  * Author(s):
  *    Andre Richter, andre.o.richter a t gmail d o t com
+ *    Lorenzo Cafaro, lorenzo@interstella.net
  */
 
 #include <stdio.h>
@@ -91,6 +92,7 @@ static void print_usage(FILE *stream, const char *program_name)
 	fprintf(stream, "  -t, --tty=/dev/*           tty the arduino is connected to.\n");
 	fprintf(stream, "  -b, --baudrate=N           baudrate of tty.\n");
 	fprintf(stream, "  -n, --num_bytes=N          the number of bytes to read from the tty.\n");
+	fprintf(stream, "  -f, --format               output format (a = ascii, d = dec, h = hex).\n");
 	fprintf(stream, "  -h, --help                 print this screen.\n");
 	exit(EXIT_FAILURE);
 }
@@ -99,14 +101,14 @@ int transmit_num_bytes(int fd, unsigned int num_bytes)
 {
 	int i;
 	unsigned char num_bytes_array[4];
-    
+
 	for (i = 0; i < 4; i++)
 		num_bytes_array[i] = (unsigned char)((num_bytes >> (i * 8)) & 0xff);
 
 	return write(fd, num_bytes_array, sizeof(num_bytes_array));
 }
 
-void eeprom_read(int fd, unsigned int num_bytes)
+void eeprom_read(int fd, unsigned int num_bytes, char format)
 {
 	int i = 0;
 	unsigned char byte;
@@ -120,32 +122,38 @@ void eeprom_read(int fd, unsigned int num_bytes)
 				printf("\nInterrupted, errno: %d\n", errno);
 		}
 		else {
-			printf("0x%08x: 0x%02x\n", i, byte);		
+			switch (format) {
+				case 'a': printf("0x%08x: %c\n", i, byte); break;
+				case 'd': printf("0x%08x: %02d\n", i, byte); break;
+				case 'h': printf("0x%08x: 0x%02x\n", i, byte); break;
+				default: printf("0x%08x: 0x%02x\n", i, byte); break;
+			}
 			fwrite(&byte, sizeof(char), 1, fp);
 			i++;
 			if (i == num_bytes)
-				break;            
+				break;
 		}
 	}
 	fclose(fp);
 	return;
 }
-    
+
 int main(int argc, char *argv[])
-{		
+{
 	int fd, err;
 	char *tty_name = NULL;
 	unsigned int num_bytes = 0;
 	int baudrate = B115200, baudrate_by_user = 0;
 	struct termios tty_attr, tty_attr_orig;
 	speed_t i_speed, o_speed, user_speed;
-
-	int next_option;	
-	extern char *optarg;  	
-	const char* short_options = "t:b:n:h";
+	char format = 0;
+	int next_option;
+	extern char *optarg;
+	const char* short_options = "t:b:n:f:h";
 	const struct option long_options[] = {
 		{ "tty",        required_argument, NULL, 't' },
 		{ "baudrate",   required_argument, NULL, 'b' },
+		{ "format",     required_argument, NULL, 'f' },
 		{ "num_bytes",  required_argument, NULL, 'n' },
 		{ "help",       no_argument,       NULL, 'h' },
 		{ 0,            0,                 0,     0  }
@@ -163,6 +171,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'n':
 			num_bytes = atoi(optarg);
+			break;
+		case 'f':
+			format = optarg[0];
 			break;
 		case 'h':
 			print_usage(stdout, argv[0]);
@@ -190,16 +201,24 @@ int main(int argc, char *argv[])
 		       "your arduino's tty device.\n\n");
 		print_usage(stdout, argv[0]);
 	}
-    
+
 	if (!num_bytes) {
 		printf("\nSorry, you did not provide how many bytes you "
 		       "want to read out from the eeprom.\n\n");
 		print_usage(stdout, argv[0]);
 	}
 
+	if (!format)
+		format = 'h';
+
+	else if (format != 'a' && format != 'd' && format != 'h') {
+		printf("\nSorry, invalid output format specified.\n\n");
+		print_usage(stdout, argv[0]);
+	}
+
 	/* Install ctrl-c signal handler */
 	sigaction(SIGINT, &int_handler, 0);
-	
+
 	/* Open tty */
 	fd = open(tty_name, O_RDWR);
 	if (fd == -1) {
@@ -218,7 +237,7 @@ int main(int argc, char *argv[])
 	i_speed = cfgetispeed(&tty_attr);
 	if (i_speed != user_speed)
 		cfsetispeed(&tty_attr, user_speed);
-	
+
 	o_speed = cfgetospeed(&tty_attr);
 	if (o_speed != user_speed)
 		cfsetospeed(&tty_attr, user_speed);
@@ -229,7 +248,7 @@ int main(int argc, char *argv[])
 	tty_attr.c_iflag &= ~(ICRNL | IXON);
 	tty_attr.c_oflag &= ~OPOST;
 	tty_attr.c_lflag &= ~(ISIG | ICANON | IEXTEN | ECHO | ECHOE | ECHOK | ECHOCTL | ECHOKE);
-	
+
 	err = tcsetattr(fd, TCSANOW, &tty_attr);
 	if (err) {
 		printf("Error while setting tty options.\n");
@@ -238,12 +257,12 @@ int main(int argc, char *argv[])
 
 	printf("tty successfully configured.\n");
 	sleep(1); /* Wait a second; Prevents that first byte send to arduino gets corrupted */
-    
+
 	if ((transmit_num_bytes(fd, num_bytes)) < 0) {
 		printf("Error while transfering dump size to arduino.\n");
 		err = EXIT_FAILURE;
 	} else {
-		eeprom_read(fd, num_bytes);
+		eeprom_read(fd, num_bytes, format);
 	}
 
 	/* Revert to original tty config */
