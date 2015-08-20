@@ -62,7 +62,7 @@ struct sigaction int_handler = {
 
 int to_termios_baudrate(unsigned int baudrate)
 {
-	switch(baudrate) {
+	switch (baudrate) {
 	case 50:     return B50;
 	case 75:     return B75;
 	case 110:    return B110;
@@ -123,10 +123,17 @@ void eeprom_read(int fd, unsigned int num_bytes, char format)
 		}
 		else {
 			switch (format) {
-				case 'a': printf("0x%08x: %c\n", i, byte); break;
-				case 'd': printf("0x%08x: %02d\n", i, byte); break;
-				case 'h': printf("0x%08x: 0x%02x\n", i, byte); break;
-				default: printf("0x%08x: 0x%02x\n", i, byte); break;
+			case 'a':
+				printf("0x%08x: %c\n", i, byte);
+				break;
+			case 'd':
+				printf("0x%08x: %02d\n", i, byte);
+				break;
+			case 'h':
+				printf("0x%08x: 0x%02x\n", i, byte);
+				break;
+			default:
+				printf("0x%08x: 0x%02x\n", i, byte);
 			}
 			fwrite(&byte, sizeof(char), 1, fp);
 			i++;
@@ -161,7 +168,7 @@ int main(int argc, char *argv[])
 
 	do {
 		next_option = getopt_long(argc, argv, short_options,long_options, NULL);
-		switch(next_option) {
+		switch (next_option) {
 		case 't':
 			tty_name = optarg;
 			break;
@@ -186,7 +193,7 @@ int main(int argc, char *argv[])
 		default:
 			abort();
 		}
-	} while(next_option != -1);
+	} while (next_option != -1);
 
 	/* check if setup parameters given and valid */
 	if (baudrate < 0) {
