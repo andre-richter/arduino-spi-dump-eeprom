@@ -1,9 +1,9 @@
-#arduino-spi-read-eeprom#
+# arduino-spi-read-eeprom
 
 
 Dump an SPI EEPROM in raw format to your PC via an Arduino.
 
-##Howto##
+## Howto
 
 1. Connect the EEPROM to your Arduino's SPI header.
     * __The sketch uses Pin 10 as the default Chip Select pin__. You can change it in the sketch if you need to.
@@ -16,18 +16,18 @@ Dump an SPI EEPROM in raw format to your PC via an Arduino.
 
 The read bytes will be stored in a file called __eeprom.bin__.
 
-##Compatibility##
+## Compatibility
 
 I have tested the program with an Arduino Due on Mac OS X and Linux, but it should work with every POSIX compatible OS.
 
-###TTY device names###
+### TTY device names
 
 * In Mac OS X, the Due shows up as `/dev/cu.usbmodem14931`.
 * In Linux, it is `/dev/ttyACM0`. __To connect from Linux, you need to be root!__
 
 Best you check it for yourself with a `dmesg` after connecting the Arduino, because Arduinos other than the Due will have different tty device names.
 
-###Compatible EEPROMs###
+### Compatible EEPROMs
 
 The Arduino sketch is compatible with `ST Micro M45PExx series` EEPROMs,
 `Sanyo LE25FW series` EEPROMs and every other SPI EEPROM that is compatible to the used read protocol:
@@ -36,7 +36,7 @@ The Arduino sketch is compatible with `ST Micro M45PExx series` EEPROMs,
 2. three bytes address
 3. keeping chip select low makes consecutive reads starting from the supplied address.
 
-##Example##
+## Example
 
     $ make
     $ ./spi_read_eeprom -t /dev/cu.usbmodem14931 -b 115200 -n 5
@@ -50,7 +50,7 @@ The Arduino sketch is compatible with `ST Micro M45PExx series` EEPROMs,
 
 Afterwards, you can edit the data with your favourite hex editor.
 
-##License##
+## License
 The MIT License (MIT)
 
 Copyright (c) 2014 Andre Richter
