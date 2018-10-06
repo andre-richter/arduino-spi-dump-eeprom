@@ -3,9 +3,6 @@
 #define SPI_READ_CMD 0x03
 #define CS_PIN 10
 
-unsigned int num_bytes;
-unsigned int i;
-
 void setup() {
   Serial.begin(115200);
 
@@ -34,6 +31,8 @@ void read_eeprom(unsigned int num_bytes) {
 }
 
 void loop() {
+  unsigned int num_bytes;
+  unsigned int i;
 
   /* wait for the integer with the requested number of bytes */
   if (Serial.available() == 4) {
