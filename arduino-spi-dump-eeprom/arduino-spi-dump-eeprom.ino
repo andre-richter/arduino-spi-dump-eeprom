@@ -3,9 +3,13 @@
 #define SPI_READ_CMD 0x03
 #define CS_PIN 10
 
+#ifndef PIN_LED
+#define PIN_LED 13
+#endif
+
 void setup() {
   Serial.begin(115200);
-
+  pinMode(PIN_LED, OUTPUT);
   pinMode(CS_PIN, OUTPUT);
   digitalWrite(CS_PIN, HIGH);
   SPI.begin();
@@ -30,19 +34,30 @@ void read_eeprom(unsigned int num_bytes) {
   digitalWrite(CS_PIN, HIGH);
 }
 
-void loop() {
+void dump() {
   unsigned int num_bytes;
   unsigned int i;
 
   /* wait for the integer with the requested number of bytes */
-  if (Serial.available() == 4) {
-    num_bytes = 0;
-
-    /* merge four bytes to single integer */
-    for (i = 0; i < 4; i++)
-      num_bytes |=  Serial.read() << (i * 8);
-
-    read_eeprom(num_bytes);
+  while (Serial.available() < 4) {
   }
+
+  num_bytes = 0;
+
+  /* merge four bytes to single integer */
+  for (i = 0; i < 4; i++)
+    num_bytes |=  Serial.read() << (i * 8);
+
+  read_eeprom(num_bytes);
 }
 
+void loop() {
+
+  digitalWrite(PIN_LED, LOW);
+
+  if (Serial.read() == 'D') {
+    digitalWrite(PIN_LED, HIGH);
+    dump();
+  }
+
+}

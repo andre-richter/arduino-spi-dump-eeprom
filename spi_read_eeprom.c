@@ -100,12 +100,12 @@ static void print_usage(FILE *stream, const char *program_name)
 int transmit_num_bytes(int fd, unsigned int num_bytes)
 {
 	int i;
-	unsigned char num_bytes_array[4];
+	unsigned char cmd_buffer[5] = { 'D' };
 
 	for (i = 0; i < 4; i++)
-		num_bytes_array[i] = (unsigned char)((num_bytes >> (i * 8)) & 0xff);
+		cmd_buffer[i+1] = (unsigned char)((num_bytes >> (i * 8)) & 0xff);
 
-	return write(fd, num_bytes_array, sizeof(num_bytes_array));
+	return write(fd, cmd_buffer, sizeof(cmd_buffer));
 }
 
 void eeprom_read(int fd, unsigned int num_bytes, char format)
@@ -248,6 +248,9 @@ int main(int argc, char *argv[])
 	o_speed = cfgetospeed(&tty_attr);
 	if (o_speed != user_speed)
 		cfsetospeed(&tty_attr, user_speed);
+
+        tty_attr.c_cflag &= ~(CSIZE | PARENB);
+        tty_attr.c_cflag |= CS8;
 
 	tty_attr.c_cc[VMIN]  = 1; /* Block reads until 1 byte is available */
 	tty_attr.c_cc[VTIME] = 0; /* Never return from read due to timeout */
