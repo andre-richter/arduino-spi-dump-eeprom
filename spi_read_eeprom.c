@@ -249,6 +249,9 @@ int main(int argc, char *argv[])
 	if (o_speed != user_speed)
 		cfsetospeed(&tty_attr, user_speed);
 
+        tty_attr.c_cflag &= ~(CSIZE | PARENB);
+        tty_attr.c_cflag |= CS8;
+
 	tty_attr.c_cc[VMIN]  = 1; /* Block reads until 1 byte is available */
 	tty_attr.c_cc[VTIME] = 0; /* Never return from read due to timeout */
 
