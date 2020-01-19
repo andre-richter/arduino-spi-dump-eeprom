@@ -30,19 +30,26 @@ void read_eeprom(unsigned int num_bytes) {
   digitalWrite(CS_PIN, HIGH);
 }
 
-void loop() {
+void dump() {
   unsigned int num_bytes;
   unsigned int i;
 
   /* wait for the integer with the requested number of bytes */
-  if (Serial.available() == 4) {
-    num_bytes = 0;
-
-    /* merge four bytes to single integer */
-    for (i = 0; i < 4; i++)
-      num_bytes |=  Serial.read() << (i * 8);
-
-    read_eeprom(num_bytes);
+  while (Serial.available() < 4) {
   }
+
+  num_bytes = 0;
+
+  /* merge four bytes to single integer */
+  for (i = 0; i < 4; i++)
+    num_bytes |=  Serial.read() << (i * 8);
+
+  read_eeprom(num_bytes);
 }
 
+void loop() {
+
+  if (Serial.read() == 'D')
+    dump();
+
+}
