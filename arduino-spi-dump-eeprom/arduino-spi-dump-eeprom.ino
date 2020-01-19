@@ -3,9 +3,13 @@
 #define SPI_READ_CMD 0x03
 #define CS_PIN 10
 
+#ifndef PIN_LED
+#define PIN_LED 13
+#endif
+
 void setup() {
   Serial.begin(115200);
-
+  pinMode(PIN_LED, OUTPUT);
   pinMode(CS_PIN, OUTPUT);
   digitalWrite(CS_PIN, HIGH);
   SPI.begin();
@@ -49,7 +53,11 @@ void dump() {
 
 void loop() {
 
-  if (Serial.read() == 'D')
+  digitalWrite(PIN_LED, LOW);
+
+  if (Serial.read() == 'D') {
+    digitalWrite(PIN_LED, HIGH);
     dump();
+  }
 
 }
